@@ -5,9 +5,12 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.core.mail import EmailMessage
 from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from django.contrib import messages
 
 from account.models import User
-from account.forms import CreateUserForm, LoginUserForm
+from account.forms import CreateUserForm, LoginUserForm, UpdateUserForm
 from .tokens import account_activation_token
 
 
@@ -89,4 +92,28 @@ def activate(request, uidb64, token):
         return redirect("index")
     else:
         return render(request, 'blog/index.html', {'error' : '계정 활성화 오류'})
-    return 
+
+
+@login_required(login_url='login')
+def profile(request, nickname):
+    user = get_object_or_404(User, nickname=nickname)
+    return render(request, 'account/profile.html', {'user': user})
+
+@login_required(login_url='login')
+def profile_update(request, nickname):
+    user = get_object_or_404(User, nickname=nickname)
+    if request.user != user:
+        messages.error(request, '수정 권한이 없습니다.')
+        return redirect('profile', nickname=nickname)
+    if request.method == 'POST':
+        form = UpdateUserForm(request.POST, instance=user)
+        if form.is_valid():
+            user = form.save(commit=False)
+            print(form.cleaned_data['profile_image'])
+            for img in request.FILES.getlist('profile_image'):
+                user.profile_image = img
+            user.save()
+            return redirect('profile', nickname=nickname)
+    else:
+        form = UpdateUserForm(instance=user)
+    return render(request, 'account/profile_update.html', {'form': form})

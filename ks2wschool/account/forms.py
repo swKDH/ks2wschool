@@ -45,6 +45,22 @@ class CreateUserForm(forms.ModelForm):
         fields = ("email", "nickname", "password1", "password2", "name", "birth_date")
 
 
+class UpdateUserForm(forms.ModelForm):
+    birth_date = forms.DateField(label='birth_date', widget=forms.DateInput(attrs={
+        'type': 'date',
+        'max': datetime.date.today(),
+        'value': datetime.date.today(),
+    }))
+    short_info = forms.CharField(label='short_info', widget=forms.Textarea(attrs={
+        'resize': None,
+    }))
+    
+    class Meta:
+        model= User
+        fields = ("name", "birth_date", "short_info", "profile_image")
+        
+    
+
 class LoginUserForm(forms.Form):
     email = forms.EmailField(
         label='email', 

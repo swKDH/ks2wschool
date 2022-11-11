@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <h1>{{ user }}님의 프로필</h1>
+    {% if request.user == user %}
+        <a href="{% url 'profile_update' user.nickname %}">계정 수정</a>
+    {% endif %}
+
+    <p>이메일: {{ user.email }}</p>
+    <p>닉네임: {{ user.nickname }}</p>
+    <p>생년월일: {{ user.birth_date }}</p>
+    <p>계정생성날짜: {{ user.created_at }}</p>
+    <p>자기 소개: {{ user.short_info }}</p>
+    <p>프로필 사진</p>
+    {% if user.profile_image %}
+        <img width=300 src="{{ user.profile_image.url }}" alt="프로필">
+    {% endif %}
+{% endblock %}
